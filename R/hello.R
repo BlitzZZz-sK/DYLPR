@@ -14,7 +14,7 @@
 #   Test Package:              'Ctrl + Shift + T'
 
 hello <- function() {
-  print("---")
+  print("
           title: "EDA_LAB3_20MIA1008"
         output: html_document
         date: "2024-01-18"
@@ -229,6 +229,6 @@ hello <- function() {
 
 
         summary(lm_model)
-  )
+  ")
 }
 
