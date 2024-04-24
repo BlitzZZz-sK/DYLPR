@@ -214,3 +214,193 @@ cat(\"Root Mean Squared Error (RMSE):\", rmse, \"\\n\")
 summary(lm_model)
 ")
 }
+
+#' Perform Analysis
+#'
+#' This function calculates RMSE and MAPE for SMA and WMA, and forecasts using an ARIMA model.
+#'
+#' @param sales A numeric vector of sales data.
+#' @export
+mean_arima <- function() {
+ # Calculate 3-year Simple Moving Average (SMA)
+ sma_3 <- (sales + c(NA, head(sales, -1)) + c(NA, NA, head(sales, -2))) / 3
+  
+ # Calculate Weighted Moving Average (WMA) with weights 1, 2, 1
+ wma_3 <- (sales + 2 * c(NA, head(sales, -1)) + c(NA, NA, head(sales, -2))) / 4
+  
+ # Actual values start from the 4th year
+ actual <- sales[4:length(sales)]
+  
+ # Forecast values for 3-year SMA
+ forecast_sma <- sma_3[4:length(sma_3)]
+  
+ # Calculate RMSE for 3-year SMA
+ rmse_sma <- sqrt(mean((actual - forecast_sma)^2))
+  
+ # Calculate MAPE for 3-year SMA
+ mape_sma <- mean(abs((actual - forecast_sma)/actual)) * 100
+  
+ # Forecast values for 3-year WMA start from the 4th year
+ forecast_wma <- wma_3[4:length(wma_3)]
+  
+ # Calculate RMSE for 3-year WMA
+ rmse_wma <- sqrt(mean((actual - forecast_wma)^2))
+  
+ # Calculate MAPE for 3-year WMA
+ mape_wma <- mean(abs((actual - forecast_wma)/actual)) * 100
+  
+ # Print RMSE and MAPE for 3-year SMA
+ cat("RMSE for 3-year SMA:", rmse_sma, "\n")
+ cat("MAPE for 3-year SMA:", mape_sma, "%\n")
+  
+ # Print RMSE and MAPE for 3-year WMA
+ cat("RMSE for 3-year WMA:", rmse_wma, "\n")
+ cat("MAPE for 3-year WMA:", mape_wma, "%\n")
+  
+ # Load required libraries
+ library(forecast)
+  
+ # Load AirPassengers dataset
+ data("AirPassengers")
+  
+ # Convert AirPassengers dataset to time series object
+ passengers_ts <- ts(AirPassengers, frequency = 12)
+  
+ # Fit ARIMA model
+ arima_model <- auto.arima(passengers_ts)
+  
+ # Forecast future values
+ forecast_values <- forecast(arima_model, h = 10)
+  
+ # Plot forecasted values
+ plot(passengers_ts, main = "Forecasted Airline Passengers", xlab = "Year", ylab = "Number of Passengers")
+ lines(forecast_values$mean, col = "blue")
+ lines(forecast_values$lower[,2], col = "red", lty = 2) # Lower bound
+ lines(forecast_values$upper[,2], col = "red", lty = 2) # Upper bound
+ lines(forecast_values$lower[,1], col = "green", lty = 2) # 80% CI lower
+ lines(forecast_values$upper[,1], col = "green", lty = 2) # 80% CI upper
+}
+
+#' Perform Naive Bayes Analysis
+#'
+#' This function performs Naive Bayes analysis on the specified dataset.
+#'
+#' @param dataset A data frame containing the dataset to analyze.
+#' @param target_col The name of the target column in the dataset.
+#' @export
+naive_bayes <- function() {
+ # Load required libraries
+ library(caret)
+ library(readr)
+  
+ # Split the data
+ set.seed(123)
+ splitIndex <- createDataPartition(dataset[[target_col]], p = 0.7, list = FALSE)
+ train_data <- dataset[splitIndex, ]
+ test_data <- dataset[-splitIndex, ]
+  
+ # Train the model
+ model <- train(target_col ~ ., data = train_data, method = "naive_bayes")
+  
+ # Predict the values
+ predictions <- predict(model, newdata = test_data)
+  
+ # Convert predictions and test data to character
+ predictions <- as.character(predictions)
+ test_data[[target_col]] <- as.character(test_data[[target_col]])
+  
+ # Manually set factor levels to be the same
+ levels_to_use <- union(predictions, test_data[[target_col]])
+ predictions <- factor(predictions, levels = levels_to_use)
+ test_data[[target_col]] <- factor(test_data[[target_col]], levels = levels_to_use)
+  
+ # Confusion Matrix
+ conf_matrix <- confusionMatrix(predictions, test_data[[target_col]])
+  
+ # Accuracy Assessment
+ accuracy <- conf_matrix$overall["Accuracy"]
+ print(conf_matrix)
+ print(paste("Accuracy:", accuracy))
+}
+
+
+#' Perform Naive Bayes Analysis with Hardcoded Parameters
+#'
+#' This function performs Naive Bayes analysis on the specified dataset with hardcoded parameters.
+#'
+#' @param dataset_path The path to the dataset CSV file.
+#' @param target_col The name of the target column in the dataset.
+#' @export
+naive_bayes_hardcoded <- function() {
+ # Load required libraries
+ library(caret)
+ library(e1071)
+  
+ # Reading dataset
+ data <- read.csv(dataset_path) 
+  
+ data[[target_col]] <- factor(data[[target_col]])
+  
+ # Split the data into training and testing sets
+ set.seed(123) # Setting seed for reproducibility
+ trainIndex <- createDataPartition(data[[target_col]], p = 0.8, 
+                                    list = FALSE, 
+                                    times = 1)
+ train_data <- data[trainIndex, ]
+ test_data <- data[-trainIndex, ]
+  
+ # Train the model using Naive Bayes classifier on the training data
+ naive_bayes_model <- naiveBayes(target_col ~ ., data = train_data)
+  
+ # Predict the values on the test set with explicitly set levels
+ test_predictions <- predict(naive_bayes_model, test_data)
+ test_predictions <- factor(test_predictions, levels = levels(test_data[[target_col]]))
+  
+ # Confusion Matrix for test data
+ test_confusion_matrix <- confusionMatrix(test_predictions, test_data[[target_col]])
+  
+ # Accuracy Assessment for test data
+ test_accuracy <- test_confusion_matrix$overall["Accuracy"]
+ print(paste("Test Accuracy: ", round(test_accuracy, 2) * 100, "%"))
+}
+
+#' Perform Decision Tree Analysis
+#'
+#' This function performs Decision Tree analysis on the specified dataset.
+#'
+#' @param dataset_path The path to the dataset CSV file.
+#' @param target_col The name of the target column in the dataset.
+#' @export
+decision_tree <- function(dataset_path, target_col) {
+ # Load required libraries
+ library(rpart)
+ library(rpart.plot)
+ library(caret)
+ library(readr)
+  
+ # Reading dataset
+ data <- read_csv(dataset_path) 
+  
+ # Convert categorical variables to factors
+ data[[target_col]] <- as.factor(data[[target_col]])
+  
+ # Split the data
+ set.seed(123) # Setting seed for reproducibility
+ splitIndex <- createDataPartition(data[[target_col]], p = 0.8, list = FALSE)
+ train_data <- data[splitIndex, ]
+ test_data <- data[-splitIndex, ]
+  
+ # Train the Decision Tree model
+ decision_tree_model <- rpart(target_col ~ ., data = train_data, method = "class")
+  
+ # Plot the tree
+ rpart.plot(decision_tree_model)
+  
+ # Predict values
+ predictions <- predict(decision_tree_model, newdata = test_data, type = "class")
+  
+ # Accuracy assessment
+ accuracy <- sum(predictions == test_data[[target_col]]) / nrow(test_data)
+ print(paste("Accuracy:", round(accuracy, 2)))
+}
+
