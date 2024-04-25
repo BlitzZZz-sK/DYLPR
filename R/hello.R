@@ -213,6 +213,38 @@ cat(\"Root Mean Squared Error (RMSE):\", rmse, \"\\n\")
 
 summary(lm_model)
 ")
+    cat("# Define the function F(X)\n",
+    "F <- function(x1, x2) {\n",
+    "  return((4*x1)^2 + 3*x1*x2 + 2.5*(x2)^2 - 5.5*x1 - 4*x2)\n",
+    "}\n\n",
+    "# Define the gradient of F(X) with respect to x1 and x2\n",
+    "grad_F <- function(x1, x2) {\n",
+    "  df_dx1 <- 2 * (4*x1) * (4) + 3*x2 - 5.5\n",
+    "  df_dx2 <- 3*x1 + 2.5 * 2 * x2 - 4\n",
+    "  return(c(df_dx1, df_dx2))\n",
+    "}\n\n",
+    "# Gradient descent function\n",
+    "gradient_descent <- function(gradient, initial_x, learning_rate, iterations) {\n",
+    "  x <- initial_x\n",
+    "\n",
+    "  for (i in 1:iterations) {\n",
+    "    grad <- gradient(x[1], x[2])\n",
+    "    x <- x - learning_rate * grad\n",
+    "  }\n",
+    "\n",
+    "  return(x)\n",
+    "}\n\n",
+    "# Initial guess for x1 and x2\n",
+    "initial_guess <- c(0, 0)\n\n",
+    "# Learning rate\n",
+    "learning_rate <- 0.01\n\n",
+    "# Number of iterations\n",
+    "iterations <- 1000\n\n",
+    "# Perform gradient descent\n",
+    "minimum <- gradient_descent(grad_F, initial_guess, learning_rate, iterations)\n\n",
+    "# Output the minimum point\n",
+    "cat('Minimum point (x1, x2):', minimum, '\\n')\n",
+    "cat('Minimum value of F(X):', F(minimum[1], minimum[2]), '\\n')\n")
 }
 
 #' Perform Analysis
