@@ -221,65 +221,39 @@ summary(lm_model)
 #'
 #' @param sales A numeric vector of sales data.
 #' @export
-mean_arima <- function() {
- # Calculate 3-year Simple Moving Average (SMA)
- sma_3 <- (sales + c(NA, head(sales, -1)) + c(NA, NA, head(sales, -2))) / 3
-  
- # Calculate Weighted Moving Average (WMA) with weights 1, 2, 1
- wma_3 <- (sales + 2 * c(NA, head(sales, -1)) + c(NA, NA, head(sales, -2))) / 4
-  
- # Actual values start from the 4th year
- actual <- sales[4:length(sales)]
-  
- # Forecast values for 3-year SMA
- forecast_sma <- sma_3[4:length(sma_3)]
-  
- # Calculate RMSE for 3-year SMA
- rmse_sma <- sqrt(mean((actual - forecast_sma)^2))
-  
- # Calculate MAPE for 3-year SMA
- mape_sma <- mean(abs((actual - forecast_sma)/actual)) * 100
-  
- # Forecast values for 3-year WMA start from the 4th year
- forecast_wma <- wma_3[4:length(wma_3)]
-  
- # Calculate RMSE for 3-year WMA
- rmse_wma <- sqrt(mean((actual - forecast_wma)^2))
-  
- # Calculate MAPE for 3-year WMA
- mape_wma <- mean(abs((actual - forecast_wma)/actual)) * 100
-  
- # Print RMSE and MAPE for 3-year SMA
- cat("RMSE for 3-year SMA:", rmse_sma, "\n")
- cat("MAPE for 3-year SMA:", mape_sma, "%\n")
-  
- # Print RMSE and MAPE for 3-year WMA
- cat("RMSE for 3-year WMA:", rmse_wma, "\n")
- cat("MAPE for 3-year WMA:", mape_wma, "%\n")
-  
- # Load required libraries
- library(forecast)
-  
- # Load AirPassengers dataset
- data("AirPassengers")
-  
- # Convert AirPassengers dataset to time series object
- passengers_ts <- ts(AirPassengers, frequency = 12)
-  
- # Fit ARIMA model
- arima_model <- auto.arima(passengers_ts)
-  
- # Forecast future values
- forecast_values <- forecast(arima_model, h = 10)
-  
- # Plot forecasted values
- plot(passengers_ts, main = "Forecasted Airline Passengers", xlab = "Year", ylab = "Number of Passengers")
- lines(forecast_values$mean, col = "blue")
- lines(forecast_values$lower[,2], col = "red", lty = 2) # Lower bound
- lines(forecast_values$upper[,2], col = "red", lty = 2) # Upper bound
- lines(forecast_values$lower[,1], col = "green", lty = 2) # 80% CI lower
- lines(forecast_values$upper[,1], col = "green", lty = 2) # 80% CI upper
-}
+gredient <- function() {
+cat("# Define the function F(X)\n",
+    "F <- function(x1, x2) {\n",
+    "  return((4*x1)^2 + 3*x1*x2 + 2.5*(x2)^2 - 5.5*x1 - 4*x2)\n",
+    "}\n\n",
+    "# Define the gradient of F(X) with respect to x1 and x2\n",
+    "grad_F <- function(x1, x2) {\n",
+    "  df_dx1 <- 2 * (4*x1) * (4) + 3*x2 - 5.5\n",
+    "  df_dx2 <- 3*x1 + 2.5 * 2 * x2 - 4\n",
+    "  return(c(df_dx1, df_dx2))\n",
+    "}\n\n",
+    "# Gradient descent function\n",
+    "gradient_descent <- function(gradient, initial_x, learning_rate, iterations) {\n",
+    "  x <- initial_x\n",
+    "\n",
+    "  for (i in 1:iterations) {\n",
+    "    grad <- gradient(x[1], x[2])\n",
+    "    x <- x - learning_rate * grad\n",
+    "  }\n",
+    "\n",
+    "  return(x)\n",
+    "}\n\n",
+    "# Initial guess for x1 and x2\n",
+    "initial_guess <- c(0, 0)\n\n",
+    "# Learning rate\n",
+    "learning_rate <- 0.01\n\n",
+    "# Number of iterations\n",
+    "iterations <- 1000\n\n",
+    "# Perform gradient descent\n",
+    "minimum <- gradient_descent(grad_F, initial_guess, learning_rate, iterations)\n\n",
+    "# Output the minimum point\n",
+    "cat('Minimum point (x1, x2):', minimum, '\\n')\n",
+    "cat('Minimum value of F(X):', F(minimum[1], minimum[2]), '\\n')\n")
 
 #' Perform Naive Bayes Analysis
 #'
