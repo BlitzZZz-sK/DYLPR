@@ -213,7 +213,7 @@ cat(\"Root Mean Squared Error (RMSE):\", rmse, \"\\n\")
 
 summary(lm_model)
 ")
-
+}
 
 #' Perform Analysis
 #'
@@ -227,7 +227,7 @@ mean_arima <- function() {
   
  # Calculate Weighted Moving Average (WMA) with weights 1, 2, 1
  wma_3 <- (sales + 2 * c(NA, head(sales, -1)) + c(NA, NA, head(sales, -2))) / 4
- } 
+  
  # Actual values start from the 4th year
  actual <- sales[4:length(sales)]
   
